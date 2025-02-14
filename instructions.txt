@@ -1,0 +1,77 @@
+COMP.CS.110 Ohjelmointi 2: Rakenteet / Programming 2: Structures
+ * Project4: Peli nimeltä 2048 / Game called 2049
+ * File: numbers_gui
+
+ * Program author:
+ *
+ * Name: Ville Nousiainen
+ * Student number: 150265575
+ * UserID: kcvino
+ * E-mail: ville.j.nousiainen@tuni.fi
+ *
+INSTRUCTIONS
+1) The rules of the game:
+
+The game 2048 is a grid-based game. In the beginning, there are a random set of square tiles with the number 2 on the grid. The player has the possibility of moving them all to 4 different directions, UP (W), RIGHT (D), DOWN (S) and LEFT (A). If 2 tiles of the same number collide, they become one tile with the sum of the two tiles. For example, two tiles with the figure 8 colliding becomes a single tile with the figure 16. The default grid size is 4x4 and default goal value is 2048, which can be achieved by combining two tiles with the numbers 1024. The user can modify the goal value and grid size.
+
+2) Instructions on how to use to program and dependencies/programming decisions made:
+
+Upon opening the program, there is a grid visible on the right hand side and several buttons, spin boxes and other widgets visible on the left hand side. Player controls the tiles on the grid with WASD keys after pressing start game.
+
+The class mainwindow implements the data structure required for the UI grid of the game. It is a nested vector that holds pointers to QLabel objects. MainWindow has the GameBoard initialised and UI datastructure of pointers to Qlabel objects is always (upon moves or resets, etc) updated to match the internal data structure of the GameBoard object.
+
+Upon opening the program the MainWindow initializes the GameBoard object and fills it with values according to the default seed value of 0. User can change this seed later. It also populates the UI datastructure of pointers to QLabels for the first time in accordance to the internal data structure.
+
+SpinBox "Seed:" controls the random starting figuration of the grid. If seed value is changed while playing the game, it resets the grid, timer and zeros the counter related to random tile removal frequency.
+
+SpinBox "Goal value" controls the required goal to be reached for a victory. The program checks whether the given goal is a power of two. If not, the actual goal is not changed and the user is informed of this. If the new goal value is the same as old one (for example, the user switches the spin box from 2048->2047->2048), nothing is done. When the goal value is actually changed, it resets the grid, timer and zeros the counter related to random tile removal frequency.
+
+SpinBox "Grid side size:" allows user to control the size of the grid from 2x2 up to 7x7. If the grid side size is changed during a game, it resets the grid, timer and zeros the counter related to random tile removal frequency. This change in grid side size empties the UI datastructure of Qlabels and populates it again with correct size grid. This slot also calls the required method of the GameBoard object that resets the internal datastructure to this new grid size. This is a different method than the fill method used to first initialize the internal datastructure. 
+This method in question is divided into 2 sides with a boolean parameter depending on whether the caller wants to change the grid size (SpinBox) or reset the game (reset button). In this case the grid size is changed. If the new grid size is smaller than the old one, the method deletes the necessary pointers. If the new grid size is bigger than the old one, the method creates new pointers to the datastructure and initializes them with values with the seed given by the user. 
+
+SpinBox "Random tile removal frequency" (default 20) allows the user to change the interval, at which the game removes (sets value to 0) a random valued-tile at random coordinates. Changing the value on this spinbox while playing does not reset the game. The frequency and counter are located as attributes of class MainWindow, and the implementation of the random removal as a method in the class GameBoard. After "random tile removal frequency" amount of moves, the program calls this method in question.
+The method creates a vector of all the values (that are not 0) on the grid and uses the current time to calculate a random index of this vector to choose a value to remove. After this the method stores all the coordinates with this value in a vector, and uses the current time to calculate a random index of this vector to be removed and sets the NumberTile objects value to 0 with these chosen coordinates.
+The user is informed when a random tile has been removed.
+
+
+Button "Start" starts the game, timer, updates UI gameboard and clears focus from the spinboxes, so that the keys to control movement (WASD) can be read immediately. If the timer is on (game is going one), the button does nothing. The game is played with WASD keys.
+
+Button "Reset" enables buttons and spinboxes in case they were disabled by 1) pause 2) win 3) lose. Resets the timer to 0. Calls the method of the GameBoard object to reset the internal datastructures numbertiles to starting values and updates the UI datastructure according to this internally updated datastructure. After a win / loss, this button changes the background color to default.
+
+TextBrowser is a way for the game to inform the user of the following things:
+- The selected goal is not a power of two
+- Random tile has been removed
+- The player has won
+- The player has lost
+- The game is on pause
+- Limitations on grid size if user tries to insert a figure too big/small.
+
+Timer tracks how much time has passed since the start of this game with the accuracy to the hundredth of a second. The timer is paused in the following instances 1) Player presses the pause button 2) Player wins 3) Player loses. Timer is reset to 0 in the following instances 1) Reset button is pressed 2) New acceptable goal value is set 3) seed value is changed.
+
+Button "pause" puts the game on pause. Pauses the timer and disables all the spin boxes and the start and pause buttons. During a pause, the game does not respond to keystrokes. When pause is pressed, a 'continue' button appears that allows the user to continue the current game. The player can also press the reset button that resets the game.
+
+Button "continue" allows the user to continue the game after a pause and is only visible after pressing the pause button.
+
+UI gamegrid displays the gamegrid to the user. The tiles become visible when the user 1) changes the seed 2) changes the goal to a new acceptable figure 3) changes the grid size 4) presses the start button. Tiles with the value 0 do not display the value, but instead are completely of the color grey. Each of the number two's power up to 2048 have their own color. All the colors above 2048 are yellow (RGB : 255,255,0). Here is a list of the values with their corresponding colors in english and RGB figures:
+- 2 : Medium turquoise : 72, 209, 204
+- 4 : Yellow green : 154, 205, 0
+- 8 : Orange : 255,165,0
+- 16 : Dark blue-gray : 102, 102, 153
+- 32 : Teal : 0, 128, 128
+- 64 : Gold :  255, 215, 0
+- 128 : Maroon : 176, 48, 96
+- 256 : Medium blue : 0, 0, 205
+- 512 : Indigo : 75, 0, 130
+- 1024 : Salmon : 250, 128, 114
+- 2048 : Chocolate : 210, 105, 30.
+The list can also be found in the implementation file of the class MainWindow (mainwindow.cpp).
+
+
+3) Extra functionalities listed: 
+- The user interface provides a possibility to adjust the size of the game grid. Resetting while playing resets the game. Range from 2x2 to 7x7.
+- Different numbers have different colors (numbers higher than 2048 are the same color)
+- The game has a timer telling the time spent so far. Pressing pause pauses it, winning/losing stops it, and doing anything that resets the game zeros it.
+- After a user-given amount of moves, a a random number is removed from the gameboard.
+- The program checks if the given goal is a power of two and allows only powers of two as the goal. Resets the game if new suitable goal is set.
+- The background color of the user interface changes, when the player wins (color seagreen) or loses (color crimson) the game. Pressing the reset button sets the original color.
+- The game has a pause button, which pauses the time when the game is on. During a pause, the game doesn't respond to key commands. The user is informed of this pause and possible ways to unpause it.
